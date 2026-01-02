@@ -2,58 +2,79 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Snake Game</title>
+  <title>Nokia Snake</title>
+
+  <!-- Pixel-style font -->
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
   <style>
     body {
-      background: #111;
+      background: #222;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
       margin: 0;
-      color: white;
-      font-family: Arial, sans-serif;
+      font-family: 'Press Start 2P', monospace;
+    }
+
+    .phone {
+      background: #444;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: inset -5px -5px 10px #333,
+                  inset 5px 5px 10px #555;
     }
 
     canvas {
-      background: #000;
-      border: 2px solid #0f0;
+      background: #9bbc0f; /* Nokia green */
+      border: 8px solid #0f380f;
+      image-rendering: pixelated;
     }
 
-    h1 {
-      position: absolute;
-      top: 20px;
+    .score {
+      text-align: center;
+      color: #0f380f;
+      margin-bottom: 10px;
+      font-size: 12px;
     }
   </style>
 </head>
 <body>
 
-<h1>Snake 🐍</h1>
-<canvas id="game" width="400" height="400"></canvas>
+<div class="phone">
+  <div class="score">SCORE: <span id="score">0</span></div>
+  <canvas id="game" width="240" height="240"></canvas>
+</div>
 
 <script>
   const canvas = document.getElementById("game");
   const ctx = canvas.getContext("2d");
+  const scoreEl = document.getElementById("score");
 
-  const gridSize = 20;
+  const gridSize = 12;
   const tileCount = canvas.width / gridSize;
 
-  let snake = [{ x: 10, y: 10 }];
-  let food = { x: 5, y: 5 };
-  let dx = 1;
-  let dy = 0;
-  let score = 0;
+  let snake, food, dx, dy, score;
 
-  function gameLoop() {
-    update();
-    draw();
+  function resetGame() {
+    snake = [{ x: 10, y: 10 }];
+    dx = 1;
+    dy = 0;
+    score = 0;
+    placeFood();
+    scoreEl.textContent = score;
   }
 
-  function update() {
-    const head = {
-      x: snake[0].x + dx,
-      y: snake[0].y + dy
+  function placeFood() {
+    food = {
+      x: Math.floor(Math.random() * tileCount),
+      y: Math.floor(Math.random() * tileCount)
     };
+  }
+
+  function gameLoop() {
+    const head = { x: snake[0].x + dx, y: snake[0].y + dy };
 
     // Wall collision
     if (
@@ -74,71 +95,52 @@
 
     snake.unshift(head);
 
-    // Food collision
+    // Food
     if (head.x === food.x && head.y === food.y) {
       score++;
+      scoreEl.textContent = score;
       placeFood();
     } else {
       snake.pop();
     }
+
+    draw();
   }
 
   function draw() {
-    ctx.fillStyle = "black";
+    // Clear screen
+    ctx.fillStyle = "#9bbc0f";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Draw snake
-    ctx.fillStyle = "lime";
-    for (let part of snake) {
+    // Snake
+    ctx.fillStyle = "#0f380f";
+    snake.forEach(part => {
       ctx.fillRect(
         part.x * gridSize,
         part.y * gridSize,
-        gridSize - 2,
-        gridSize - 2
+        gridSize,
+        gridSize
       );
-    }
+    });
 
-    // Draw food
-    ctx.fillStyle = "red";
+    // Food
     ctx.fillRect(
       food.x * gridSize,
       food.y * gridSize,
-      gridSize - 2,
-      gridSize - 2
+      gridSize,
+      gridSize
     );
-
-    // Score
-    ctx.fillStyle = "white";
-    ctx.font = "16px Arial";
-    ctx.fillText("Score: " + score, 10, 20);
-  }
-
-  function placeFood() {
-    food.x = Math.floor(Math.random() * tileCount);
-    food.y = Math.floor(Math.random() * tileCount);
-  }
-
-  function resetGame() {
-    snake = [{ x: 10, y: 10 }];
-    dx = 1;
-    dy = 0;
-    score = 0;
-    placeFood();
   }
 
   document.addEventListener("keydown", e => {
-    if (e.key === "ArrowUp" && dy === 0) {
-      dx = 0; dy = -1;
-    } else if (e.key === "ArrowDown" && dy === 0) {
-      dx = 0; dy = 1;
-    } else if (e.key === "ArrowLeft" && dx === 0) {
-      dx = -1; dy = 0;
-    } else if (e.key === "ArrowRight" && dx === 0) {
-      dx = 1; dy = 0;
-    }
+    if (e.key === "ArrowUp" && dy === 0) { dx = 0; dy = -1; }
+    if (e.key === "ArrowDown" && dy === 0) { dx = 0; dy = 1; }
+    if (e.key === "ArrowLeft" && dx === 0) { dx = -1; dy = 0; }
+    if (e.key === "ArrowRight" && dx === 0) { dx = 1; dy = 0; }
   });
 
-  setInterval(gameLoop, 100);
+  resetGame();
+  setInterval(gameLoop, 150); // slower, old-school speed
 </script>
 
 </body>
